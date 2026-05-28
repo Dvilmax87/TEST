@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculateur automatique PAC gainable - Générez vos devis en 5 minutes">
+    <meta name="theme-color" content="#2196F3">
+    <title>Calculateur PAC Gainable - Devis Automatique</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%232196F3' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>PAC</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            color: #2196F3;
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            color: #2196F3;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #1565c0;
+            border-left: 3px solid #2196F3;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reset {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-print {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #45a049;
+        }
+
+        .btn-download {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #e68900;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value {
+            color: #2196F3;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .result-unit {
+            color: #999;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .total-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .total-box .label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .total-box .value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-left: 3px solid #dc3545;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 3px solid #28a745;
+            color: #155724;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .devis-container {
+            background: white;
+            padding: 40px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .devis-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 20px;
+        }
+
+        .devis-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .devis-subtitle {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .devis-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+
+        .devis-info-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .devis-info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .devis-info-value {
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .devis-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .devis-table th {
+            background: #2196F3;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .devis-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .devis-totals {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #2196F3;
+        }
+
+        .devis-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-weight: 600;
+        }
+
+        .devis-total-row.highlight {
+            background: #f5f5f5;
+            padding: 15px 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            color: #2196F3;
+        }
+
+        .devis-payment {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .devis-payment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .devis-footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .scenarios {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .scenario-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #2196F3;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scenario-card:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .scenario-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .scenario-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .scenario-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .panel, header {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+            button, .button-group, .tabs, .tab-btn {
+                display: none;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2196F3;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .install-btn {
+            background: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Calculateur PAC Gainable</h1>
+            <p>Générez vos devis complets en 5 minutes</p>
+            <button class="install-btn" id="installBtn">Installer l'app</button>
+        </header>
+
+        <div class="content">
+            <!-- PANNEAU GAUCHE: SAISIE -->
+            <div class="panel">
+                <h2>📋 Paramètres du projet</h2>
+                
+                <div class="form-group">
+                    <label for="surface">Surface du bâtiment (m²) *</label>
+                    <input type="number" id="surface" value="80" min="20" max="500" step="5">
+                    <div class="info-box">Surface totale à climatiser</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="typeBuilding">Type de bâtiment *</label>
+                    <select id="typeBuilding">
+                        <option value="ancien">Ancien (0.18 kW/m² - Isolation faible)</option>
+                        <option value="standard" selected>Standard (0.12 kW/m² - Isolation moyenne)</option>
+                        <option value="neuf">Neuf (0.08 kW/m² - Bien isolé)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="distance">Distance unité extérieure (m) *</label>
+                    <input type="number" id="distance" value="20" min="5" max="100" step="1">
+                    <div class="info-box">Distance module externe vers local technique</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="zones">Nombre de zones *</label>
+                    <select id="zones">
+                        <option value="1">1 zone (Simple)</option>
+                        <option value="2">2 zones</option>
+                        <option value="3" selected>3 zones (Recommandé)</option>
+                        <option value="4">4 zones</option>
+                        <option value="5">5 zones</option>
+                        <option value="6">6 zones (Maximum)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="accessibility">Accessibilité combles *</label>
+                    <select id="accessibility">
+                        <option value="facile">Facile (×0.8 - Accès facile)</option>
+                        <option value="standard" selected>Standard (×1.0 - Normal)</option>
+                        <option value="difficile">Difficile (×1.2 - Accès restreint)</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-calculate" onclick="calculer()">✓ Calculer le devis</button>
+                    <button class="btn-reset" onclick="reinitialiser()">↺ Réinitialiser</button>
+                </div>
+            </div>
+
+            <!-- PANNEAU DROIT: RESULTATS -->
+            <div class="panel">
+                <h2>📊 Résultats du calcul</h2>
+                
+                <div id="alertes"></div>
+
+                <div class="result-item">
+                    <span class="result-label">Coefficient thermique:</span>
+                    <span class="result-value"><span id="coeff">0.12</span><span class="result-unit">kW/m²</span></span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Puissance brute:</span>
+                    <span class="result-value"><span id="puissanceBrute">9.6</span><span class="result-unit">kW</span></span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Puissance PAC:</span>
+                    <span class="result-value"><span id="puissancePAC">10</span><span class="result-unit">kW</span></span>
+                </div>
+
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+
+                <div class="result-item">
+                    <span class="result-label">Diamètre conduit:</span>
+                    <span class="result-value"><span id="diametre">160</span><span class="result-unit">mm</span></span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Longueur conduits:</span>
+                    <span class="result-value"><span id="longueurConduits">55</span><span class="result-unit">m</span></span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Débit par zone:</span>
+                    <span class="result-value"><span id="debit">400</span><span class="result-unit">m³/h</span></span>
+                </div>
+
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+
+                <div class="result-item">
+                    <span class="result-label">Durée MOD:</span>
+                    <span class="result-value"><span id="dureeMOD">31.2</span><span class="result-unit">h</span></span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Coût MOD:</span>
+                    <span class="result-value"><span id="coutMOD">1404</span><span class="result-unit">€</span></span>
+                </div>
+
+                <div class="total-box">
+                    <div class="label">TOTAL DEVIS TTC</div>
+                    <div class="value" id="totalTTC">8716€</div>
+                </div>
+
+                <button class="btn-print" onclick="imprimer()" style="width: 100%; margin-top: 15px;">🖨️ Imprimer le devis</button>
+            </div>
+        </div>
+
+        <!-- ONGLETS -->
+        <div class="panel">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('details')">Détails composants</button>
+                <button class="tab-btn" onclick="switchTab('scenarios')">Scénarios</button>
+                <button class="tab-btn" onclick="switchTab('tarifs')">Tarifs de référence</button>
+            </div>
+
+            <!-- TAB: Détails -->
+            <div id="details" class="tab-content active">
+                <h3 style="margin: 15px 0; color: #333;">Quantités automatiques</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Article</th>
+                            <th>Quantité</th>
+                            <th>P.U.</th>
+                            <th>Coût</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailsTable">
+                        <tr><td colspan="4">Cliquez sur "Calculer" pour afficher</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB: Scénarios -->
+            <div id="scenarios" class="tab-content">
+                <h3 style="margin: 15px 0; color: #333;">Exemples de configuration</h3>
+                <div class="scenarios" id="scenariosContainer"></div>
+            </div>
+
+            <!-- TAB: Tarifs -->
+            <div id="tarifs" class="tab-content">
+                <h3 style="margin: 15px 0; color: #333;">Puissances PAC standard</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Puissance</th>
+                            <th>Unité Ext.</th>
+                            <th>Unité Int.</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>6 kW</td><td>800€</td><td>1200€</td><td>2000€</td></tr>
+                        <tr><td>7 kW</td><td>850€</td><td>1250€</td><td>2100€</td></tr>
+                        <tr><td>8 kW</td><td>900€</td><td>1350€</td><td>2250€</td></tr>
+                        <tr><td>9 kW</td><td>1000€</td><td>1400€</td><td>2400€</td></tr>
+                        <tr><td>10 kW</td><td>1100€</td><td>1500€</td><td>2600€</td></tr>
+                        <tr><td>12 kW</td><td>1200€</td><td>1700€</td><td>2900€</td></tr>
+                        <tr><td>14 kW</td><td>1350€</td><td>1850€</td><td>3200€</td></tr>
+                        <tr><td>16 kW</td><td>1450€</td><td>2000€</td><td>3450€</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IMPRESSION DEVIS -->
+    <div id="devisModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; overflow-y: auto; padding: 20px;">
+        <div class="devis-container" style="max-width: 900px; margin: 0 auto;">
+            <div class="devis-header">
+                <div class="devis-title">DEVIS D'INSTALLATION</div>
+                <div class="devis-subtitle">Pompe à Chaleur Air-Air Gainable</div>
+            </div>
+
+            <div class="devis-info">
+                <div class="devis-info-item">
+                    <div class="devis-info-label">Numéro:</div>
+                    <div class="devis-info-value" id="devisNum">DEVIS_001</div>
+                </div>
+                <div class="devis-info-item">
+                    <div class="devis-info-label">Date:</div>
+                    <div class="devis-info-value" id="devisDate">28/05/2026</div>
+                </div>
+                <div class="devis-info-item">
+                    <div class="devis-info-label">Surface:</div>
+                    <div class="devis-info-value"><span id="devisSurface">80</span> m²</div>
+                </div>
+                <div class="devis-info-item">
+                    <div class="devis-info-label">Puissance PAC:</div>
+                    <div class="devis-info-value"><span id="devisPAC">10</span> kW</div>
+                </div>
+            </div>
+
+            <table class="devis-table" id="devisTable">
+                <thead>
+                    <tr>
+                        <th>Article</th>
+                        <th>Quantité</th>
+                        <th>P.U.</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody id="devisLines"></tbody>
+            </table>
+
+            <div class="devis-totals">
+                <div class="devis-total-row">
+                    <span>SOUS-TOTAL HT:</span>
+                    <span id="devisHT">7264€</span>
+                </div>
+                <div class="devis-total-row">
+                    <span>TVA 20%:</span>
+                    <span id="devisTVA">1452.8€</span>
+                </div>
+                <div class="devis-total-row highlight">
+                    <span>TOTAL TTC À PAYER:</span>
+                    <span id="devisTotalTTC">8716.8€</span>
+                </div>
+            </div>
+
+            <div class="devis-payment">
+                <div class="devis-payment-item">
+                    <span>Acompte 30% à la signature:</span>
+                    <span id="devisAcompte">2615€</span>
+                </div>
+                <div class="devis-payment-item">
+                    <span>Solde 70% à la mise en service:</span>
+                    <span id="devisSolde">6101€</span>
+                </div>
+            </div>
+
+            <div class="devis-footer">
+                <p style="margin-bottom: 10px;">Délai d'installation: 14 jours | Garantie: 2 ans pièces + main-d'œuvre</p>
+                <button class="btn-print" onclick="window.print()" style="width: 100%; margin-bottom: 10px;">🖨️ Imprimer</button>
+                <button class="btn-download" onclick="telechargerPDF()" style="width: 100%; margin-bottom: 10px;">⬇️ Télécharger PDF</button>
+                <button class="btn-reset" onclick="document.getElementById('devisModal').style.display='none'" style="width: 100%;">✕ Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DONNÉES DE RÉFÉRENCE
+        const coefficients = {
+            ancien: 0.18,
+            standard: 0.12,
+            neuf: 0.08
+        };
+
+        const tarifs = {
+            6: { ext: 800, int: 1200, total: 2000, debit: 600 },
+            7: { ext: 850, int: 1250, total: 2100, debit: 650 },
+            8: { ext: 900, int: 1350, total: 2250, debit: 700 },
+            9: { ext: 1000, int: 1400, total: 2400, debit: 800 },
+            10: { ext: 1100, int: 1500, total: 2600, debit: 900 },
+            12: { ext: 1200, int: 1700, total: 2900, debit: 1050 },
+            14: { ext: 1350, int: 1850, total: 3200, debit: 1150 },
+            16: { ext: 1450, int: 2000, total: 3450, debit: 1250 }
+        };
+
+        const diametres = [
+            { min: 0, max: 200, dia: 100, prix: 8 },
+            { min: 200, max: 300, dia: 125, prix: 10 },
+            { min: 300, max: 500, dia: 160, prix: 12 },
+            { min: 500, max: 900, dia: 200, prix: 15 },
+            { min: 900, max: 1200, dia: 250, prix: 18 }
+        ];
+
+        const regulations = {
+            1: { type: 'Filaire simple', cout: 120, duree: 1 },
+            2: { type: 'Filaire simple', cout: 150, duree: 1.5 },
+            3: { type: 'Programmable WiFi', cout: 1150, duree: 5 },
+            4: { type: 'Programmable WiFi', cout: 1450, duree: 5.5 },
+            5: { type: 'Intelligente Mobile', cout: 2400, duree: 8 },
+            6: { type: 'Intelligente Mobile', cout: 3000, duree: 8.5 }
+        };
+
+        const scenarios = [
+            { nom: 'T2 Petit', surface: 45, type: 'standard', distance: 15, zones: 1, pac: 6, cout: 5040 },
+            { nom: 'T3 Moyen', surface: 70, type: 'standard', distance: 18, zones: 2, pac: 9, cout: 7320 },
+            { nom: 'T4 Grand', surface: 100, type: 'standard', distance: 25, zones: 4, pac: 12, cout: 10200 },
+            { nom: 'Villa', surface: 150, type: 'neuf', distance: 30, zones: 6, pac: 12, cout: 14160 },
+            { nom: 'Maison Ancienne', surface: 120, type: 'ancien', distance: 20, zones: 3, pac: 22, cout: 12240 }
+        ];
+
+        // FONCTION PRINCIPALE DE CALCUL
+        function calculer() {
+            const surface = parseFloat(document.getElementById('surface').value);
+            const typeBuilding = document.getElementById('typeBuilding').value;
+            const distance = parseFloat(document.getElementById('distance').value);
+            const zones = parseInt(document.getElementById('zones').value);
+            const accessibility = document.getElementById('accessibility').value;
+
+            // VALIDATION
+            if (isNaN(surface) || surface < 20 || surface > 500) {
+                afficherAlerte('Veuillez entrer une surface valide (20-500 m²)', 'danger');
+                return;
+            }
+
+            // COEFFICIENTS
+            const coeff = coefficients[typeBuilding];
+            const coeffAcces = { facile: 0.8, standard: 1.0, difficile: 1.2 }[accessibility];
+
+            // PUISSANCE
+            const puissanceBrute = surface * coeff;
+            const puissances = [6, 7, 8, 9, 10, 12, 14, 16];
+            const puissance = puissances.find(p => p >= puissanceBrute);
+
+            if (!puissance) {
+                afficherAlerte('Surface trop importante (>200 m²), consultez le fabricant', 'danger');
+                return;
+            }
+
+            // CONDUITS
+            const surfaceParZone = surface / zones;
+            const debit = surfaceParZone * 15;
+            const diamObj = diametres.find(d => debit >= d.min && debit < d.max) || diametres[diametres.length - 1];
+            const longueurParZone = (surfaceParZone * 0.5) + 5;
+            const longueurTotal = longueurParZone * zones;
+
+            // ACCESSOIRES
+            const grilles = Math.round(surface / 8);
+            const reprise = Math.round(surface / 10);
+            const coudes = Math.round(longueurTotal / 6);
+            const tes = zones;
+            const colliers = Math.round(longueurTotal / 1.5);
+            const clapets = Math.max(0, zones - 1);
+            const tuyauFrigo = distance * 1.2;
+            const cableElec = distance * 1.5;
+
+            // REGULAT ION
+            const regul = regulations[zones];
+
+            // MOD
+            const dureeMODBase = (1.5 + 2.5 + 2.5 + 10 + 3.5 + 2.5 + 1.5 + 2.5);
+            const dureeMOD = (dureeMODBase * coeffAcces) + (zones * 0.5) + regul.duree;
+            const coutMOD = dureeMOD * 45;
+
+            // COUTS
+            const cout_equipements = tarifs[puissance].total;
+            const cout_conduits = longueurTotal * diamObj.prix;
+            const cout_accessories = (grilles * 12) + (reprise * 8) + (coudes * 9) + (tes * 6) + (colliers * 0.5) + (clapets * 180) + (tuyauFrigo * 18) + 120 + (cableElec * 1.5);
+            const coutSousTotal = cout_equipements + cout_conduits + cout_accessories + regul.cout + coutMOD + 200; // +200 frais dépla
+            const coutHT = coutSousTotal;
+            const tva = coutHT * 0.2;
+            const totalTTC = coutHT + tva;
+
+            // AFFICHAGE RÉSULTATS
+            document.getElementById('coeff').textContent = coeff.toFixed(2);
+            document.getElementById('puissanceBrute').textContent = puissanceBrute.toFixed(1);
+            document.getElementById('puissancePAC').textContent = puissance;
+            document.getElementById('diametre').textContent = diamObj.dia;
+            document.getElementById('longueurConduits').textContent = longueurTotal.toFixed(0);
+            document.getElementById('debit').textContent = debit.toFixed(0);
+            document.getElementById('dureeMOD').textContent = dureeMOD.toFixed(1);
+            document.getElementById('coutMOD').textContent = coutMOD.toFixed(0);
+            document.getElementById('totalTTC').textContent = totalTTC.toFixed(0) + '€';
+
+            // DÉTAILS TABLE
+            const detailsHTML = `
+                <tr><td>Grilles diffusion</td><td>${grilles}</td><td>12€</td><td>${grilles * 12}€</td></tr>
+                <tr><td>Grilles reprise</td><td>${reprise}</td><td>8€</td><td>${reprise * 8}€</td></tr>
+                <tr><td>Coudes 90°</td><td>${coudes}</td><td>9€</td><td>${coudes * 9}€</td></tr>
+                <tr><td>Tés distribution</td><td>${tes}</td><td>6€</td><td>${tes * 6}€</td></tr>
+                <tr><td>Colliers fixation</td><td>${colliers}</td><td>0.5€</td><td>${(colliers * 0.5).toFixed(1)}€</td></tr>
+                <tr><td>Clapets motorisés</td><td>${clapets}</td><td>180€</td><td>${clapets * 180}€</td></tr>
+                <tr><td>Conduits PVC ∅${diamObj.dia}mm</td><td>${longueurTotal.toFixed(0)}m</td><td>${diamObj.prix}€</td><td>${cout_conduits.toFixed(0)}€</td></tr>
+                <tr><td>Tuyau frigorifique</td><td>${tuyauFrigo.toFixed(0)}m</td><td>18€</td><td>${(tuyauFrigo * 18).toFixed(0)}€</td></tr>
+                <tr><td>Fluide frigorigène</td><td>1</td><td>120€</td><td>120€</td></tr>
+                <tr><td>Câble électrique</td><td>${cableElec.toFixed(0)}m</td><td>1.5€</td><td>${(cableElec * 1.5).toFixed(0)}€</td></tr>
+            `;
+            document.getElementById('detailsTable').innerHTML = detailsHTML;
+
+            // DEVIS MODAL
+            genererDevis({
+                surface, typeBuilding, zones, puissance, debit: debit.toFixed(0),
+                longueurTotal: longueurTotal.toFixed(0), dureeMOD: dureeMOD.toFixed(1),
+                grilles, reprise, coudes, tes, colliers, clapets,
+                coutHT: coutHT.toFixed(0), tva: tva.toFixed(1), totalTTC: totalTTC.toFixed(0)
+            });
+
+            // ALERTES
+            const alerteHTML = [];
+            if (dureeMOD > 40) {
+                alerteHTML.push('<div class="alert alert-warning">⚠️ Durée MOD importante (>40h) - Vérifier accessibilité</div>');
+            }
+            if (totalTTC < 5000) {
+                alerteHTML.push('<div class="alert alert-warning">⚠️ Vérifier coûts - Totalité basse</div>');
+            }
+            if (clapets === 0 && zones > 1) {
+                alerteHTML.push('<div class="alert alert-success">✓ Configuration simple sans clapets motorisés</div>');
+            }
+            document.getElementById('alertes').innerHTML = alerteHTML.join('');
+
+            afficherAlerte('✓ Devis calculé avec succès!', 'success');
+        }
+
+        function genererDevis(data) {
+            const devisLines = `
+                <tr><td>Unité extérieure ${data.puissance} kW</td><td>1</td><td>${tarifs[data.puissance].ext}€</td><td>${tarifs[data.puissance].ext}€</td></tr>
+                <tr><td>Module gainable ${data.puissance} kW</td><td>1</td><td>${tarifs[data.puissance].int}€</td><td>${tarifs[data.puissance].int}€</td></tr>
+                <tr><td>Conduits + Accessoires</td><td>${data.longueurTotal}m</td><td>12€/m</td><td>${(data.longueurTotal * 12)}€</td></tr>
+                <tr><td>Régulation + Clapets</td><td>${data.zones}</td><td>${regulations[data.zones].cout / data.zones}€</td><td>${regulations[data.zones].cout}€</td></tr>
+                <tr><td>Tuyauterie frigorifique</td><td>1</td><td>432€</td><td>432€</td></tr>
+                <tr><td>Installation (${data.dureeMOD}h)</td><td>${data.dureeMOD}</td><td>45€/h</td><td>${(data.dureeMOD * 45).toFixed(0)}€</td></tr>
+                <tr><td>Frais de déplacement</td><td>1</td><td>200€</td><td>200€</td></tr>
+            `;
+            document.getElementById('devisLines').innerHTML = devisLines;
+            document.getElementById('devisSurface').textContent = data.surface;
+            document.getElementById('devisPAC').textContent = data.puissance;
+            document.getElementById('devisHT').textContent = data.coutHT + '€';
+            document.getElementById('devisTVA').textContent = data.tva + '€';
+            document.getElementById('devisTotalTTC').textContent = data.totalTTC + '€';
+            document.getElementById('devisAcompte').textContent = (data.totalTTC * 0.3).toFixed(0) + '€';
+            document.getElementById('devisSolde').textContent = (data.totalTTC * 0.7).toFixed(0) + '€';
+        }
+
+        function imprimer() {
+            document.getElementById('devisModal').style.display = 'block';
+        }
+
+        function telechargerPDF() {
+            alert('Fonction PDF disponible en mode installé\n\nVous pouvez utiliser:\n- Imprimer puis "Enregistrer en PDF"\n- Ou installer l\'app');
+        }
+
+        function reinitialiser() {
+            document.getElementById('surface').value = '80';
+            document.getElementById('typeBuilding').value = 'standard';
+            document.getElementById('distance').value = '20';
+            document.getElementById('zones').value = '3';
+            document.getElementById('accessibility').value = 'standard';
+            document.getElementById('alertes').innerHTML = '';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tab === 'scenarios') {
+                afficherScenarios();
+            }
+        }
+
+        function afficherScenarios() {
+            const html = scenarios.map(s => `
+                <div class="scenario-card" onclick="chargerScenario('${s.nom}')">
+                    <div class="scenario-title">${s.nom}</div>
+                    <div class="scenario-details">
+                        <div class="scenario-detail"><span>Surface:</span> <span>${s.surface}m²</span></div>
+                        <div class="scenario-detail"><span>Zones:</span> <span>${s.zones}</span></div>
+                        <div class="scenario-detail"><span>PAC:</span> <span>${s.pac}kW</span></div>
+                        <div class="scenario-detail"><span>Prix:</span> <span>${s.cout.toLocaleString()}€</span></div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('scenariosContainer').innerHTML = html;
+        }
+
+        function chargerScenario(nom) {
+            const scenario = scenarios.find(s => s.nom === nom);
+            document.getElementById('surface').value = scenario.surface;
+            document.getElementById('typeBuilding').value = scenario.type;
+            document.getElementById('distance').value = scenario.distance;
+            document.getElementById('zones').value = scenario.zones;
+            calculer();
+            afficherAlerte(`✓ Scénario "${nom}" chargé`, 'success');
+        }
+
+        function afficherAlerte(message, type) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.style.background = type === 'success' ? '#4CAF50' : type === 'danger' ? '#dc3545' : '#ffc107';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        // PWA INSTALLATION
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'inline-block';
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('installBtn').style.display = 'none';
+            }
+        });
+
+        // SERVICE WORKER
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        // INIT
+        calculer();
+        afficherScenarios();
+    </script>
+</body>
+</html>
