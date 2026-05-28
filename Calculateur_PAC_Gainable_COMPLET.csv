@@ -1,427 +1,345 @@
-CALCULATEUR_PAC_GAINABLE,VERSION 1.0,DATE: 2026-05-28
+SECTION,DONNEES_ENTREE,VALEUR,UNITE,TYPE,DESCRIPTION
 ================================================================================
-SECTION 1: PARAMETRES D'ENTREE
+DONNEES_D_ENTREE,,,,,
 ================================================================================
-PARAMETRE,VALEUR,UNITE,TYPE,NOTES
-Surface totale à climatiser,[SAISIR],m²,NOMBRE,Surface du bâtiment à climatiser
-Type de bâtiment,[CHOISIR],texte,DROPDOWN,"Ancien (0.18 kW/m²) / Standard (0.12 kW/m²) / Neuf (0.08 kW/m²)"
-Distance unité extérieure,[SAISIR],m,NOMBRE,Distance entre groupe externe et local technique
-Nombre de zones,[1-6],zones,NOMBRE,Nombre zones de régulation (1=simple / 2-3=standard / 4-6=multi-zone)
-Accessibilité aux combles,[CHOISIR],texte,DROPDOWN,"Facile (0.8x) / Standard (1.0x) / Difficile (1.2x)"
-Hauteur sous plafond,2.5,m,NOMBRE,"Moyenne 2.5m, peut être ajusté"
+,Surface du bâtiment,80,m²,NOMBRE,Entrez la surface totale à climatiser
+,Type de bâtiment,Standard,texte,DROPDOWN,"Ancien (0.18 kW/m²) | Standard (0.12 kW/m²) | Neuf (0.08 kW/m²)"
+,Distance unité extérieure,20,m,NOMBRE,Distance entre le groupe externe et le local technique
+,Nombre de zones,3,zones,NOMBRE,"Nombre de zones de régulation (1-6)"
+,Accessibilité combles,Standard,texte,DROPDOWN,"Facile (×0.8) | Standard (×1.0) | Difficile (×1.2)"
 
 ================================================================================
-SECTION 2: COEFFICIENTS ET TABLES DE REFERENCE
 ================================================================================
+SECTION,CALCULS_AUTOMATIQUES,VALEUR,UNITE,FORMULE,DESCRIPTION
+================================================================================
+DIMENSIONNEMENT,,,,,
+,Coefficient thermique,0.12,kW/m²,VLOOKUP(Type),Selon type bâtiment
+,Puissance brute,9.6,kW,Surface × Coefficient,80 × 0.12 = 9.6 kW
+,Puissance arrondie,10,kW,ROUND(UP),Arrondir à l'unité supérieure → 10 kW
+,PAC sélectionnée,10 kW,kW,VLOOKUP(Puissance),Modèle standard disponible
 
-TABLE A: TYPES DE BATIMENTS
-Type_Batiment,Coefficient_kW_par_m2,Coefficient_Complexite_MOD,Notes
-Ancien,0.18,1.3,Isolation faible
-Standard,0.12,1.0,Isolation moyenne (référence)
-Neuf,0.08,0.8,Bien isolé (RT 2012+)
+CONDUITS_DISTRIBUTION,,,,,
+,Surface par zone,26.67,m²,Surface ÷ Zones,80 ÷ 3 = 26.67 m² par zone
+,Débit par zone,400,m³/h,Surface_zone × 15,26.67 × 15 = 400 m³/h
+,Diamètre conduit,160,mm,IF(Débit),400 m³/h → ∅160 mm
+,Longueur par zone,18.34,m,(Surface_zone × 0.5) + 5,Distribution standard
+,Longueur totale conduits,55,m,Longueur_zone × Zones,18.34 × 3 = 55 m
 
-TABLE B: DIAMETRES CONDUITS
-Debit_Min_m3h,Debit_Max_m3h,Diametre_mm,Section_cm2,Prix_par_metre_EUR,Vitesse_m_s
-0,150,75,44.18,5,2
-150,250,100,78.54,8,2.5
-250,400,125,122.72,10,3
-400,600,160,201.06,12,3
-600,900,200,314.16,15,3.5
-900,1200,250,490.87,18,4
+ACCESSOIRES_AUTOMATIQUES,,,,,
+,Grilles diffusion,10,pièces,Surface ÷ 8,80 ÷ 8 = 10 grilles
+,Grilles reprise,8,pièces,Surface ÷ 10,80 ÷ 10 = 8 grilles
+,Coudes 90°,9,pièces,Longueur_total ÷ 6,55 ÷ 6 = 9 coudes
+,Réductions diamètre,3,pièces,Nombre_zones,1 par zone
+,Tés distribution,3,pièces,Nombre_zones,1 par zone
+,Colliers fixation,37,pièces,Longueur_total ÷ 1.5,55 ÷ 1.5 = 37 colliers
+,Clapets motorisés,2,pièces,Zones - 1,3 - 1 = 2 clapets
+,Tuyau frigorifique,24,m,Distance × 1.2,20 × 1.2 = 24 m
+,Fluide frigorigène R410A,1,quantité,Standard,1 unité par PAC
+,Câble électrique,30,m,Distance × 1.5,20 × 1.5 = 30 m
+,Isolant conduits,60.5,m,Longueur_total × 1.1,55 × 1.1 = 60.5 m
 
-TABLE C: PUISSANCES PAC STANDARD
-Puissance_kW,Unite_Externe_EUR,Debit_m3h,Unite_Interne_EUR,Total_Equipements_EUR,Coef_Frigorigene
-6,800,600,1200,2000,0.85
-7,850,650,1250,2100,0.95
-8,900,700,1350,2250,1.05
-9,1000,800,1400,2400,1.15
-10,1100,900,1500,2600,1.25
-12,1200,1050,1700,2900,1.50
-14,1350,1150,1850,3200,1.75
-16,1450,1250,2000,3450,2.00
+REGULATION,,,,,
+,Nombre zones,3,zones,Saisie,Détermine le type de régulation
+,Type régulation,Programmable WiFi,texte,IF(Zones),3 zones → Régulation WiFi
+,Durée MOD régulation,5,heures,VLOOKUP(Zones),Durée d'installation régulation
+,Coût régulation,1150,EUR,VLOOKUP(Zones),"Thermostat (400€) + clapets (600€) + capteurs (150€)"
 
-TABLE D: GRILLES DE DIFFUSION
-Diametre_Conduit_mm,Grille_Type,Prix_Unitaire_EUR,Debit_Nominal_m3h
-100,Plastique_100,12,150
-125,Plastique_125,14,250
-160,Aluminium_160,16,400
-200,Aluminium_200,20,600
+MAIN_D_OEUVRE,,,,,
+,Durée préparation,1.5,h,BASE,Visite / Sécurité
+,Durée unité externe,2.5,h,BASE × Coeff,Installation groupe externe
+,Durée module interne,2.5,h,BASE × Coeff,Manutention / Fixation
+,Durée conduits,12.5,h,"BASE (10h) + Zones (2.5h)",Travail important
+,Durée frigorifique,3.5,h,BASE × Coeff,Technicien REF
+,Durée électricité,2.5,h,BASE × Coeff,Électricien agréé
+,Durée régulation,2.4,h,"BASE (1.5h) + Zones (0.9h)",Configuration / Tests
+,Durée tests services,2.5,h,BASE × Coeff,Formation client
+,Durée totale MOD,31.2,h,SUM(Toutes_étapes),TOTAL: 31.2 heures
+,Coût horaire moyen,45,EUR/h,Standard,Tarif moyen France (35-55€)
+,Coût MOD total,1404,EUR,Durée_total × 45,31.2 × 45 = 1404 EUR
 
-TABLE E: ACCESSOIRES STANDARD
-Article,Unite,Prix_Unitaire_EUR,Quantite_Formule,Notes
-Coude_90_100,pcs,5,Longueur_conduits/6,Par 6m de conduit
-Coude_90_125,pcs,7,Longueur_conduits/6,Par 6m de conduit
-Coude_90_160,pcs,9,Longueur_conduits/6,Par 6m de conduit
-Reduction_diametre,pcs,3,NombreZones,Une par zone
-Té_distribution,pcs,6,NombreZones,Une par zone
-Collier_fixation,pcs,0.5,Longueur_conduits/1.5,Tous les 1.5m
-Silencieux_100,pcs,20,NombreZones*0.3,Optionnel - 1 par 3 zones
-Clapet_antiretour,pcs,8,NombreZones,Un par branche
-
-TABLE F: REGULATI ON
-Nombre_Zones,Type_Regulation,Thermostat_EUR,Clapets_Motorises_EUR,Capteurs_EUR,Coût_Total_EUR,Duree_MOD_heures,Notes
-1,Filaire_simple,120,0,0,120,1,On/Off basique
-2,Filaire_simple,150,0,0,150,1.5,On/Off avec 2 zones
-3,Programmable_WiFi,400,600,150,1150,5,Multi-zone motorisée
-4,Programmable_WiFi,450,800,200,1450,5.5,Multi-zone motorisée
-5,Intelligente_Mobile,1200,1000,300,2500,8,App mobile + géolocalisation
-6,Intelligente_Mobile,1400,1200,400,3000,8.5,Premium complet
-
-TABLE G: MAIN D'ŒUVRE - ETAPES
-Etape,Duree_Base_Heures,Cout_Horaire_EUR,Coefficient_Complexite_Base,Coefficient_par_Zone,Notes
-1_Preparation,1.5,30,1.0,0,Visite/sécurité
-2_Unite_Externe,2.5,40,1.0,0,Installation groupe
-3_Module_Interne,2.5,35,1.0,0,Manutention/fixation
-4_Conduits_Accessoires,10,30,1.2,0.5,Travail important - +30min par zone
-5_Frigorifique,3.5,50,1.0,0,Technicien REF obligatoire
-6_Electricite,2.5,45,1.0,0,Électricien agréé
-7_Regulation,1.5,35,1.0,0.3,+18min par zone
-8_Tests_Mise_Service,2.5,40,1.0,0,Formation client
-
-TABLE H: OPTIONS DE CONFORT
-Option,Prix_EUR,Duree_MOD_heures,Coef_Surcoût,Notes
-Filtre_Anti_Pollens,300,2,1.5,Maintenance annuelle 50€
-Humidificateur,600,3,2,Régulation hygrométrie
-Déshumidificateur,600,3,2,Régulation humidité
-Photocellule_Jour_Nuit,200,1.5,1.2,Marche/arrêt automatique
-Telecommande_WiFi,150,1,1.1,Contrôle mobile
-Extension_Garantie_5ans,400,0,0,Pièces + MOD
-Extension_Garantie_10ans,700,0,0,Pièces + MOD
-Contrat_Maintenance_5ans,400,0,0,1 intervention/an
+EQUIPEMENTS_PRINCIPAUX,,,,,
+,Unité extérieure 10kW,1100,EUR,Tarif fournisseur,Classe A++ 2026
+,Module gainable 10kW,1500,EUR,Tarif fournisseur,Débit 900 m³/h
+,SOUS-TOTAL ÉQUIPEMENTS,2600,EUR,SUM,Prix de base
 
 ================================================================================
-SECTION 3: CALCULS AUTOMATIQUES
 ================================================================================
+SECTION,ACCESSOIRES_DETAILS,QUANTITE,PRIX_UNITAIRE,COUT_TOTAL,DESCRIPTION
+================================================================================
+DISTRIBUTION_AIR,,,,,
+,Grille diffusion plastique ∅160,10,12 EUR,120 EUR,1 grille par 8 m²
+,Grille reprise air ∅160,8,8 EUR,64 EUR,1 grille par 10 m²
+,Coude 90° ∅160 mm,9,9 EUR,81 EUR,1 coude par 6 m conduit
+,Réduction de diamètre,3,3 EUR,9 EUR,1 par zone
+,Té distribution,3,6 EUR,18 EUR,1 par zone
+,Colliers fixation,37,0.5 EUR,18.5 EUR,1 tous les 1.5 m
+,Silencieux/Atténuateurs,1,25 EUR,25 EUR,Optionnel
 
-CALCUL 1: DIMENSIONNEMENT PUISSANCE
-,Calcul,Formule,Resultat
-Surface (m²),80,Saisie,80
-Type bâtiment,Standard,Saisie,Standard
-Coefficient thermique (kW/m²),0.12,"Lookup(Type,TableA)",0.12
-Puissance brute (kW),9.6,"Surface * Coefficient",9.6
-Puissance arrondie (kW),10,"ROUND(Puissance,0) vers supérieur",10
-PAC sélectionnée,10 kW,"Lookup(Puissance, TableC)",10 kW
+FRIGORIFIQUE_ELECTRICITE,,,,,
+,Tuyauterie cuivre isolée 24m,24,18 EUR/m,432 EUR,Isolant 9mm
+,Fluide frigorigène R410A,1,120 EUR,120 EUR,Quantité standard
+,Câble alimentation + disjoncteur,1,140 EUR,140 EUR,Lot complet
 
-CALCUL 2: CONDUITS - PAR ZONE
-Zone,Surface_m2,Debit_m3h,Formule_Debit,Diametre_mm,Longueur_m,Formule_Longueur,PU_EUR_m,Cout_EUR
-1,26.67,400,"26.67*15",160,18.34,"26.67*0.5+5",12,220
-2,26.67,400,"26.67*15",160,18.34,"26.67*0.5+5",12,220
-3,26.66,400,"26.66*15",160,18.33,"26.66*0.5+5",12,220
-TOTAL,80,1200,,160,55,,,660
+REGULATION_CONTROLE,,,,,
+,Clapets motorisés,2,180 EUR,360 EUR,1 par zone supplémentaire
+,Thermostat programmable WiFi,1,400 EUR,400 EUR,Programmable + géolocalisation
+,Capteurs température,2,75 EUR,150 EUR,Supplémentaires pour zones
 
-CALCUL 3: ACCESSOIRES - CALCULS AUTOMATIQUES
-Article,Quantite_Formule,Quantite_Resultat,PU_EUR,Cout_Total_EUR,Notes
-Grilles_Diffusion,"Surface/8",10,12,120,"80/8=10"
-Grilles_Reprise,"Surface/10",8,8,64,"80/10=8"
-Coudes_90,"Longueur/6",9.17,9,82.5,"55/6≈9"
-Réductions_Diametre,"NombreZones",3,3,9,"3 zones"
-Tés_Distribution,"NombreZones",3,6,18,"3 zones"
-Colliers_Fixation,"Longueur/1.5",37,0.5,18.5,"55/1.5≈37"
-Clapets_Motorisés,"NombreZones-1",2,180,360,"3-1=2"
-Tuyau_Frigorifique_m,"Distance*1.2",24,18,432,"20*1.2=24m"
-Fluide_R410A,1,1,120,120,"Quantité standard"
-Cable_Electricité_m,"Distance*1.5",30,1.5,45,"20*1.5=30m"
-Isolant_Conduits_m,"Longueur*1.1",60.5,2,121,"55*1.1"
-TOTAL_ACCESSOIRES,,,,"1269.5",
-
-CALCUL 4: REGULATION - SELECTION AUTOMATIQUE
-Nombre_Zones,3
-Type_Recommande,Programmable_WiFi
-Cout_Regulation_EUR,1150
-Clapets_Motorises_EUR,600
-Duree_MOD_heures,5
-Détail,"Thermostat WiFi (400€) + 2 clapets motorisés (600€) + capteurs (150€)"
-
-CALCUL 5: EQUIPEMENTS PRINCIPAUX
-Puissance_PAC,10 kW
-Unité_Extérieure_EUR,1100
-Unité_Interne_EUR,1500
-Total_Équipements_EUR,2600
-Débit_Nominal_m3h,900
-
-CALCUL 6: MAIN-D'ŒUVRE - DUREE TOTALE
-Etape,Duree_Base_h,Coeff_Complexite,Coeff_Zones,Duree_Calculee_h,Cout_Horaire,Cout_EUR,Notes
-Preparation,1.5,1,0,1.5,30,45,Standard
-Unité_Externe,2.5,1,0,2.5,40,100,Technicien qualifié
-Module_Interne,2.5,1,0,2.5,35,87.5,Manutention
-Conduits,10,1.2,0.5,12.5,30,375,"10h + 2.5h (3 zones)"
-Frigorifique,3.5,1,0,3.5,50,175,REF obligatoire
-Electricite,2.5,1,0,2.5,45,112.5,Électricien agréé
-Regulation,1.5,1,0.3,2.4,35,84,"1.5h + 0.9h (3 zones)"
-Tests_Services,2.5,1,0,2.5,40,100,Formation client
-TOTAL_MOD,26.5,,,31.2,Moyen,979.5,
-
-CALCUL 7: DEVIS COMPLET - RECAPITULATIF
-Rubrique,Prix_HT_EUR,Pourcentage_Total
-Équipements_Principaux,2600,31.6%
-Accessoires_Distribution,1269.5,15.4%
-Régulation_Contrôle,1150,13.9%
-Frigorifique_Électrique,597,7.2%
-Main-d'Œuvre,1447.5,17.6%
-Frais_Déplacement,200,2.4%
-TOTAL_HT,7264,100%
-TVA_20%,1452.8,
-TOTAL_TTC,8716.8,
-
-CALCUL 8: MARGES ET RENTABILITE
-Coût_Matériel_HT,5217,
-Coût_MOD,1447.5,
-Frais_Généraux_10%,721.7,
-COUT_REVIENT_TOTAL,7385.7,
-PRIX_VENTE_HT,7264,ERREUR: Prix < Coût!
-Prix_Vente_Avec_40_Marge,10339.98,"7385.7 * 1.4"
-Marge_Brute_EUR,2954.98,"10339.98 - 7385"
-Taux_Marge_Percent,40%,"2954.98 / 7385.7"
-Coefficient_Multiplicateur,1.4,"10339.98 / 7385.7"
+ISOLATIONS_ACCESSOIRES,,,,,
+,Conduit PVC ∅160 isolé 25mm,55,12 EUR/m,660 EUR,Laine minérale
 
 ================================================================================
-SECTION 4: EXPORT DEVIS CLIENT
+,TOTAL ACCESSOIRES,,,1269.5 EUR,
 ================================================================================
 
-DEVIS_NUMERO,DEVIS_001
-DATE_DEVIS,2026-05-28
-CLIENT_NOM,[À remplir]
-CLIENT_ADRESSE,[À remplir]
-CLIENT_TELEPHONE,[À remplir]
-CLIENT_EMAIL,[À remplir]
+================================================================================
+SECTION,TARIFS_DE_REFERENCE,,,,"À mettre à jour selon vos fournisseurs"
+================================================================================
 
-CARACTERISTIQUES_INSTALLATION,
-Surface_Bâtiment_m2,80
-Type_Bâtiment,Standard
-Nombre_Zones,3
-Puissance_PAC_kW,10
-Délai_Installation_Jours,14
-Garantie_Ans,2
+PUISSANCES_PAC_STANDARD,,,,,
+Puissance_kW,Unite_Externe_EUR,Debit_m3h,Unite_Interne_EUR,Total_Equipements_EUR,Notes
+6,800,600,1200,2000,Petit T2
+7,850,650,1250,2100,T2
+8,900,700,1350,2250,T3 petit
+9,1000,800,1400,2400,T3 standard
+10,1100,900,1500,2600,T4 petit
+12,1200,1050,1700,2900,T4 grand
+14,1350,1150,1850,3200,T5
+16,1450,1250,2000,3450,Maison grande
 
-DEVIS_LIGNE_ITEMS,
-Ligne,Description,Quantité,Unité,PU_EUR,Montant_EUR
-1,Unité extérieure 10 kW Classe A++,1,pcs,1100,1100
-2,Module gainable 10 kW intérieur,1,pcs,1500,1500
-3,Conduit PVC isolé ∅160 mm (25 mm),55,m,12,660
-4,Grille diffusion plastique ∅160,10,pcs,12,120
-5,Grille reprise air ∅160,8,pcs,8,64
-6,Coude 90° ∅160 mm,9,pcs,9,81
-7,Réduction de diamètre,3,pcs,3,9
-8,Té distribution,3,pcs,6,18
-9,Colliers fixation,37,pcs,0.5,18.5
-10,Clapets motorisés,2,pcs,180,360
-11,Thermostat programmable WiFi,1,pcs,400,400
-12,Capteurs température supplémentaires,2,pcs,75,150
-13,Tuyauterie cuivre isolée ∅9 mm,24,m,18,432
-14,Fluide frigorigène R410A,1,quantité,120,120
-15,Câble alimentation + disjoncteur,1,lot,140,140
-16,Installation complète (31.2 h),31.2,h,45,1404
-17,Frais de déplacement,1,forfait,200,200
+DIAMETRES_CONDUITS,,,,,
+Debit_m3h_Min,Debit_m3h_Max,Diametre_mm,Prix_EUR_par_m,Section_cm2,Notes
+0,150,75,5,44,Très petit débit
+150,250,100,8,79,Chambre simple
+250,400,125,10,123,Chambre + séjour
+400,600,160,12,201,Salon / Cuisine
+600,900,200,15,314,Gros débit
+900,1200,250,18,491,PAC puissante
+
+TYPES_BATIMENTS,,,,,
+Type_Batiment,Coefficient_kW_m2,Coefficient_MOD,Exemple,Notes
+Ancien,0.18,1.3,Maison 1970,"Faible isolation, déperditions importantes"
+Standard,0.12,1.0,Maison 2005,"Isolation moyenne (RÉFÉRENCE)"
+Neuf,0.08,0.8,Maison 2020+,"Bien isolé RT 2012+ / Bâtiment BBC"
+
+TYPES_REGULATION,,,,,
+Nombre_Zones,Type_Regulation,Thermostat_EUR,Clapets_EUR,Capteurs_EUR,Cout_Total_EUR,Duree_MOD_h
+1-2,Filaire simple,120,0,0,120,1
+3-4,Programmable WiFi,400,600,150,1150,5
+5-6,Intelligente Mobile,1200,900,300,2400,8
+
+================================================================================
+================================================================================
+SECTION,DEVIS_COMPLET,LIGNE,DESCRIPTION,QUANTITE,PU_EUR,MONTANT_EUR
+================================================================================
+
+DEVIS_CLIENT_TYPE,,,,,
+,,,,,
+,DEVIS INSTALLATION PAC GAINABLE,,,
+,Numéro:,DEVIS_001,Date:,28/05/2026,
+,,,,,
+,CLIENT: ________________________,ADRESSE: ________________________,
+,CARACTERISTIQUES:,,,
+,,Surface 80 m²,Type Standard,10 kW,3 zones
+,,,,,
+
+LIGNE_ARTICLE,,,,,
+1,Unité extérieure 10 kW Classe A++,1,1100,1100
+2,Module gainable 10 kW intérieur,1,1500,1500
+3,Conduit PVC isolé ∅160 mm (55m),55,12,660
+4,Grille diffusion plastique ∅160,10,12,120
+5,Grille reprise air ∅160,8,8,64
+6,Coude 90° ∅160 mm,9,9,81
+7,Réduction de diamètre,3,3,9
+8,Té distribution,3,6,18
+9,Colliers fixation,37,0.5,18.5
+10,Clapets motorisés,2,180,360
+11,Thermostat programmable WiFi,1,400,400
+12,Capteurs température,2,75,150
+13,Tuyauterie cuivre isolée 24m,24,18,432
+14,Fluide frigorigène R410A,1,120,120
+15,Câble + disjoncteur,1,140,140
+16,Installation complète,31.2,45,1404
+17,Frais de déplacement,1,200,200
+,,,,,
 ,SOUS-TOTAL HT,,,7264
 ,TVA 20%,,,1452.8
-,TOTAL TTC,,,8716.8
-
-MODALITES_PAIEMENT,
-Acompte_30_Pourcent_EUR,2615.04
-Acompte_30_Pourcent_Pourcentage,30%
-Solde_70_Pourcent_EUR,6101.76
-Solde_70_Pourcent_Pourcentage,70%
-Conditions,"Acompte à la signature du devis, solde à la mise en service"
-
-DATES_IMPORTANTES,
-Date_Devis,2026-05-28
-Date_Validité_Devis_Jours,30
-Date_Installation_Prevue,TBD
-Date_Mise_Service,TBD
-Délai_Moyen_Installation_Jours,14
-
-INFORMATIONS_SUPPLEMENTAIRES,
-Garantie_Description,"2 ans pièces + main-d'œuvre"
-Prochain_Entretien_Mois,12
-Maintenance_Annuelle_EUR,180
-Certification_Technicien,REF + Électricien agréé
-Fluide_Frigorigene_Type,R410A
-Classe_Énergétique,A++
-Bruit_Unité_Interne_dB,23
-Bruit_Unité_Externe_dB,45
+,TOTAL TTC (À PAYER),,,8716.8
+,,,,,
+,Acompte 30% à la signature,,,2615.04
+,Solde 70% à la mise en service,,,6101.76
+,Délai installation: 14 jours,Garantie: 2 ans pièces + MOD,
 
 ================================================================================
-SECTION 5: FORMULES EXCEL/CALC - A COPIER
+================================================================================
+SECTION,SCENARIOS_PRECALCULES,SURFACE,TYPE,ZONES,PUISSANCE_kW,COUT_HT,COUT_TTC,MOD_h,JOURS
 ================================================================================
 
-FORMULE_PUISSANCE,=B2*VLOOKUP(B3,Types!A:B,2,0)
-FORMULE_PAC_ARRONDIE,=CEILING(FORMULE_PUISSANCE,1)
-FORMULE_SURFACE_PAR_ZONE,=B2/B5
-FORMULE_DEBIT_ZONE,=FORMULE_SURFACE_PAR_ZONE*15
-FORMULE_DIAMETRE,=IF(FORMULE_DEBIT_ZONE<200,100,IF(FORMULE_DEBIT_ZONE<300,125,IF(FORMULE_DEBIT_ZONE<500,160,200)))
-FORMULE_LONGUEUR_CONDUITS,=FORMULE_SURFACE_PAR_ZONE*0.5+5
-FORMULE_LONGUEUR_TOTAL,=FORMULE_LONGUEUR_CONDUITS*B5
-FORMULE_GRILLES_DIFFUSION,=ROUND(B2/8,0)
-FORMULE_GRILLES_REPRISE,=ROUND(B2/10,0)
-FORMULE_COUDES,=ROUND(FORMULE_LONGUEUR_TOTAL/6,0)
-FORMULE_CLAPETS,=MAX(0,B5-1)
-FORMULE_TUYAU_FRIGO,=B4*1.2
-FORMULE_CABLE_ELEC,=B4*1.5
-FORMULE_COUT_REGULATION,=VLOOKUP(B5,Regulation!A:D,4,0)
-FORMULE_DUREE_MOD_REGULATION,=VLOOKUP(B5,Regulation!A:D,5,0)
-FORMULE_DUREE_MOD_TOTAL,=(1.5+2.5+2.5+10+3.5+2.5)*VLOOKUP(B6,Acces!A:B,2,0)+FORMULE_DUREE_MOD_REGULATION
-FORMULE_COUT_MOD,=FORMULE_DUREE_MOD_TOTAL*45
-FORMULE_TOTAL_HT,=SUM(D:D)
-FORMULE_TVA,=FORMULE_TOTAL_HT*0.20
-FORMULE_TOTAL_TTC,=FORMULE_TOTAL_HT+FORMULE_TVA
-FORMULE_ACOMPTE,=FORMULE_TOTAL_TTC*0.30
-FORMULE_SOLDE,=FORMULE_TOTAL_TTC*0.70
+SCENARIO_1_PETIT_T2,45,Standard,1,6,4200,5040,18,3
+SCENARIO_2_T3_MOYEN,70,Standard,2,9,6100,7320,24,4
+SCENARIO_3_T4_GRAND,100,Standard,4,12,8500,10200,36,5
+SCENARIO_4_VILLA_COMPLET,150,Neuf,6,12,11800,14160,42,7
+SCENARIO_5_MAISON_ANCIENNE,120,Ancien,3,22,10200,12240,35,5
 
 ================================================================================
-SECTION 6: SCENARIOS PRE-CALCULES
+================================================================================
+SECTION,ALERTES_ET_VERIFICATIONS,PARAMETRE,SEUIL_MIN,SEUIL_MAX,STATUS,ACTION
 ================================================================================
 
-SCENARIO_T2_PETIT,
-Surface_m2,45
-Type_Batiment,Standard
-Distance_m,15
-Nombre_Zones,1
-Puissance_PAC_kW,5.4 -> 6kW
-Cout_HT_EUR,4200
-Cout_TTC_EUR,5040
-Duree_MOD_heures,18
-Duree_Installation_jours,3
+CONTROLE_QUALITE,,,,,
+,Taux marge %,25%,60%,À VERIFIER,"Si <25%: prix trop bas | Si >60%: client peut négocier"
+,Coût horaire MOD,35 EUR,55 EUR,À VERIFIER,Adapter selon région
+,Ratio MOD % total,12%,25%,À VERIFIER,Travail équilibré?
+,Ratio Équipements % total,25%,40%,À VERIFIER,Coûts équipements raisonnables?
+,Durée installation jours,3,10,À VERIFIER,"<3j = impossible | >10j = trop long"
+,Débit conduits m3h,100,1200,À VERIFIER,"Trop bas = augmenter diamètre | Trop haut = OK"
+,Diamètre conduit mm,100,250,À VERIFIER,En dehors = calcul incorrect
+,Puissance PAC kW,5,20,À VERIFIER,"<5 = trop petit | >20 = trop gros"
 
-SCENARIO_T3_MOYEN,
-Surface_m2,70
-Type_Batiment,Standard
-Distance_m,18
-Nombre_Zones,2
-Puissance_PAC_kW,8.4 -> 9kW
-Cout_HT_EUR,6100
-Cout_TTC_EUR,7320
-Duree_MOD_heures,24
-Duree_Installation_jours,4
-
-SCENARIO_T4_GRAND,
-Surface_m2,100
-Type_Batiment,Standard
-Distance_m,25
-Nombre_Zones,4
-Puissance_PAC_kW,12 kW
-Cout_HT_EUR,8500
-Cout_TTC_EUR,10200
-Duree_MOD_heures,36
-Duree_Installation_jours,5
-
-SCENARIO_VILLA_COMPLET,
-Surface_m2,150
-Type_Batiment,Neuf
-Distance_m,30
-Nombre_Zones,6
-Puissance_PAC_kW,12 kW
-Cout_HT_EUR,11800
-Cout_TTC_EUR,14160
-Duree_MOD_heures,42
-Duree_Installation_jours,7
-
-SCENARIO_MAISON_ANCIENNE,
-Surface_m2,120
-Type_Batiment,Ancien
-Distance_m,20
-Nombre_Zones,3
-Puissance_PAC_kW,21.6 -> 22kW
-Cout_HT_EUR,10200
-Cout_TTC_EUR,12240
-Duree_MOD_heures,35
-Duree_Installation_jours,5
+ALERTES_AUTOMATIQUES,,,,,
+ALERTE,CONDITION,CAUSE_PROBABLE,SOLUTION
+"❌ COUT TROP BAS",Marge < 20%,"Tarifs trop bas OU Durée MOD oubliée","Vérifier tous les tarifs fournisseurs"
+"❌ COUT TROP HAUT",Marge > 60%,"Surcoût injustifié OU erreur calcul","Réduire marge OU justifier auprès client"
+"⚠ DELAI IMPOSSIBLE",MOD > 40h,"Accès difficile OU trop de zones","Vérifier accès aux combles"
+"⚠ DEBIT INSUFFISANT",Débit < 100 m³/h,"Surface zone trop petite","Pas de problème - petit débit normal"
+"❌ PUISSANCE INSUFFISANTE",PAC < Besoins calculés,"Erreur type bâtiment OU surface mal saisie","Passer taille PAC supérieure"
+"⚠ CONDUITS TRES LONGS",Longueur > 100m,"Installation complexe OU multi-étages","Vérifier pertes de charge"
 
 ================================================================================
-SECTION 7: GUIDE D'UTILISATION DU CSV
+================================================================================
+SECTION,FORMULES_EXCEL_A_COPIER,CELLULE,FORMULE,EXPLICATION
 ================================================================================
 
-UTILISATION_EXCEL,
-Etape_1,Importer ce CSV dans Excel (Données > Depuis texte)
-Etape_2,Remplir les paramètres SECTION 1 colonnes B
-Etape_3,Les calculs SECTION 3 se mettent à jour automatiquement
-Etape_4,Export SECTION 4 génère le devis client
-Etape_5,Vérifier marges SECTION 8 avant envoi
+DIMENSIONNEMENT,,,
+,B11,=B2*VLOOKUP(B3,$A$30:$B$32,2,0),Surface × Coeff thermique
+,B12,=CEILING(B11,1),Arrondir vers le haut
+,B13,=VLOOKUP(B12,$A$35:$H$42,3,0),Sélectionner PAC standard
 
-UTILISATION_GOOGLE_SHEETS,
-Etape_1,File > Import > Upload > Sélectionner ce CSV
-Etape_2,Créer les formules dans Google Sheets (identiques Excel)
-Etape_3,Copier les formules dans les cellules appropriées
-Etape_4,Ajouter formules de contrôle (IF, VLOOKUP)
-Etape_5,Partager le fichier avec l'équipe commerciale
+CONDUITS,,,
+,B15,=B2/B5,Surface par zone
+,B16,=B15*15,Débit = Surface × 15 m³/h
+,B17,=IF(B16<200,100,IF(B16<300,125,IF(B16<500,160,IF(B16<900,200,250)))),Diamètre selon débit
+,B18,=B15*0.5+5,Longueur par zone
+,B19,=B18*B5,Longueur totale
 
-PERSONALISATION,
-Modifier_PU_Equipements,Éditer TABLE C pour vos tarifs fournisseurs
-Modifier_Coût_Horaire_MOD,Éditer TABLE G colonne "Cout_Horaire_EUR"
-Modifier_Frais_Deplacement,Ajuster ligne "Frais_Déplacement" SECTION 4
-Modifier_Taux_TVA,Si TVA ≠ 20% adapter formule TOTAL_TTC
-Modifier_Marge_Commerciale,Adapter ligne "TAUX_MARGE_PERCENT" en SECTION 8
+ACCESSOIRES,,,
+,B21,=ROUND(B2/8,0),Grilles diffusion
+,B22,=ROUND(B2/10,0),Grilles reprise
+,B23,=ROUND(B19/6,0),Coudes 90°
+,B24,=B5,Tés
+,B25,=ROUND(B19/1.5,0),Colliers
+,B26,=MAX(0,B5-1),Clapets motorisés
+,B27,=B4*1.2,Tuyau frigorifique
+,B28,=B4*1.5,Câble électrique
+,B29,=B19*1.1,Isolant conduits
 
-================================================================================
-SECTION 8: CONTROLE QUALITE ET MARGES
-================================================================================
+MOD_MAIN_D_ŒUVRE,,,
+,B32,=(1.5+2.5+2.5+10+3.5+2.5+1.5+2.5)*VLOOKUP(B6,$A$45:$B$47,2,0)+(B5*0.5)+VLOOKUP(B5,$A$48:$E$51,5,0),Durée totale MOD
+,B33,=B32*45,Coût MOD = Durée × 45€/h
 
-VERIFICATION_AVANT_ENVOI,
-Parametre,Seuil_Min,Seuil_Max,Statut,Notes
-Taux_Marge_Percent,25%,60%,OK,"35-40% cible standard"
-Coût_Horaire_Moyen_EUR,35,55,OK,"45€ référence"
-Ratio_MOD_Pourcent_Total,12%,25%,OK,"Doit être 15-20%"
-Ratio_Equipements_Pourcent_Total,25%,40%,OK,"Doit être 30-35%"
-Delai_Installation_jours,3,10,OK,"Réaliste selon zones"
-Durée_Conduits_Pourcentage_MOD,30%,45%,OK,"Travail important"
-
-ALERTES_AUTOMATIQUES,
-Alerte,Condition,Action
-Cout_Trop_Bas,Taux_Marge<20%,"RECALCULER - Vérifier tarifs"
-Cout_Trop_Haut,Taux_Marge>60%,"Attention client - Justifier"
-Delai_Impossible,MOD>40h,"Vérifier accès/complexité"
-Debit_Insuffisant,Debit_Par_Zone<100,"Augmenter diamètre conduit"
-Puissance_Insuffisante,Puissance_PAC<Besoins,"Passer taille supérieure"
-
-BENCHMARKING,
-Type_Client,Marge_Min,Marge_Ref,Marge_Max,Coeff_Multiplicateur
-Grand_Compte,20%,25%,30%,1.20-1.30
-Client_Standard,30%,40%,50%,1.30-1.50
-Petit_Chantier,35%,45%,55%,1.35-1.55
-Urgent_Emergency,45%,55%,70%,1.45-1.70
-Referral_Ami,25%,35%,45%,1.25-1.45
+DEVIS,,,
+,B50,=VLOOKUP(B12,$A$35:$H$42,8,0)*2,Équipements
+,B51,=SUM(Accessoires_Lignes),Total accessoires
+,B52,=VLOOKUP(B5,$A$48:$E$51,4,0),Régulation
+,B53,=B33,Main-d'œuvre
+,B54,=(B50+B51+B52+B53)*1.2,Sous-total + 20% frais
+,B55,=B54*0.2,TVA 20%
+,B56,=B54+B55,TOTAL TTC
+,B57,=B56*0.3,Acompte 30%
+,B58,=B56*0.7,Solde 70%
 
 ================================================================================
-SECTION 9: NOTES ET REMARQUES
+================================================================================
+SECTION,MARGES_ET_RENTABILITE,TYPE_CLIENT,MARGE_MIN,MARGE_REF,MARGE_MAX,COEFF_MULT
 ================================================================================
 
-IMPORTANT,
-- Le coefficient thermique change selon type bâtiment (Ancien/Standard/Neuf)
-- La durée MOD augmente avec le nombre de zones (+30min/zone pour conduits)
-- Les clapets motorisés = Nombre zones - 1 (toujours une zone sans clapet)
-- REF obligatoire pour frigorifique (technicien certifié)
-- Électricien agréé requis pour électricité
-- TVA 20% s'applique sur tout HT
-- Marge recommandée: 35-40% pour client standard
-- Frais généraux à ajouter: 10% du coût matériel+MOD
+BENCHMARK_MARGES,,,,,
+,Grand compte (volume),20%,25%,30%,1.20-1.30
+,Client standard (RÉFÉRENCE),30%,40%,50%,1.30-1.50
+,Petit chantier,35%,45%,55%,1.35-1.55
+,Urgent / Emergency,45%,55%,70%,1.45-1.70
+,Referral / Bouche-à-oreille,25%,35%,45%,1.25-1.45
 
-SOURCES_PRIX,
-- Équipements: tarifs constructeurs 2026 (Daikin/Mitsubishi)
-- Accessoires: distributeurs BTP (Acédis/Rexel/Aislet)
-- Main-d'œuvre: tarifs pratiqués régions France
-- Tarif horaire: 45€/h moyen (35-55€ selon région)
-
-LIMITATIONS,
-- Formules supposent distribution air homogène
-- Longueur conduits = approximation (peut varier ±20%)
-- Tarifs fournitures peuvent fluctuer
-- Coût MOD dépend techniciens disponibles
-- Distance >50m peut nécessiter calcul spécifique
-- Surface >200m² consulter fabricant pour dimensionnement
-
-VERSIONS_FUTURES,
-- V1.1: Ajouter calcul consommation énergétique annuelle
-- V1.2: Intégrer coût maintenance 5-10 ans
-- V1.3: Ajouter export PDF automatique
-- V1.4: Connecter à base données fournisseurs en ligne
-- V2.0: Application web interactive avec sauvegarde cloud
+CALCUL_MARGE,,,,,
+,Coût matériel HT,5217,EUR,,Somme tous matériaux
+,Coût MOD,1404,EUR,,31.2h × 45€/h
+,Frais généraux 10%,721.7,EUR,,10% (matériel + MOD)
+,COUT DE REVIENT TOTAL,7342.7,EUR,,À NE PAS DESCENDRE
+,Prix de vente HT,10200,EUR,,"7342.7 × 1.40 = 10280 (avec 40% marge)"
+,TVA 20%,2040,EUR,,À facturer
+,PRIX CLIENT TTC,12240,EUR,,À facturer client
+,Marge brute,2857.3,EUR,,10200 - 7342.7
+,Taux marge,38.9%,EUR,,"2857.3 / 7342.7"
+,Coefficient multiplicateur,1.39,X,,"10200 / 7342.7"
 
 ================================================================================
-FIN DU FICHIER CSV
 ================================================================================
-VERSION,1.0
-DATE_CREATION,2026-05-28
-AUTEUR,Formation PAC Gainable
-STATUT,PRODUCTION
-LICENCE,Interne - Propriété de l'entreprise
-COMPATIBLE_AVEC,"Excel 2016+, LibreOffice Calc, Google Sheets, Numbers"
-SUPPORT,contact@formationpac.fr
+SECTION,MODE_EMPLOI_SIMPLE,ETAPE,ACTION,TEMPS
+================================================================================
+
+UTILISATION_RAPIDE,,,
+1,Saisir 5 paramètres SECTION 1,1 minute
+2,Vérifier calculs SECTION 2 auto-complétés,30 secondes
+3,Consulter devis SECTION 3 généré,30 secondes
+4,Vérifier marges SECTION 8 acceptables,1 minute
+5,Imprimer devis SECTION 3 pour client,1 minute
+,TOTAL TEMPS,4 minutes
+
+IMPORT_EXCEL,,,
+1,Télécharger ce CSV,1 minute
+2,Ouvrir dans Excel,10 secondes
+3,Données > Depuis texte > Importer,1 minute
+4,Organiser en colonnes,2 minutes
+5,Copier formules SECTION 6 dans cellules,3 minutes
+6,Tester avec données d'exemple,2 minutes
+,TOTAL SETUP,9 minutes
+
+IMPORT_GOOGLE_SHEETS,,,
+1,Fichier > Importer > Uploader ce CSV,2 minutes
+2,Créer tables de référence (SECTION 5),5 minutes
+3,Ajouter formules (SECTION 6),5 minutes
+4,Partager avec équipe,1 minute
+5,Tester accès partagé,1 minute
+,TOTAL SETUP,14 minutes
+
+================================================================================
+================================================================================
+SECTION,NOTES_IMPORTANTES,POINT,VALEUR,EXPLICATION
+================================================================================
+
+REGLES_ESSENTIELLES,,,
+,Coefficient thermique,Ancien: 0.18 | Standard: 0.12 | Neuf: 0.08,"CRUCIAL - Détermine la puissance PAC"
+,Puissance PAC,TOUJOURS arrondir vers le HAUT,"Toujours préférer légèrement surdimensionné"
+,Nombre clapets motorisés,= Zones - 1,"Une zone de base (module) + (N-1) clapets"
+,Coût horaire MOD,45€/h MOYEN,"Varie: Paris 55€/h | Région 35-40€/h"
+,TVA,20% standard,"Adapter si TVA réduite 5.5% (rare)"
+,Marge client standard,35-40% visée,"Ne pas descendre <25% sauf négociation"
+,Durée MOD,+30min par zone supplémentaire,"Régulation complexe = travail supplémentaire"
+
+CERTIFICATIONS_OBLIGATOIRES,,,
+,Technicien REF,OBLIGATOIRE,Pour manipuler fluides frigorigènes
+,Électricien agréé,OBLIGATOIRE,Pour branchements électriques
+,Assurance décennale,OBLIGATOIRE,Pour garantie structurelle
+
+TARIFS_A_METTRE_A_JOUR,,,
+,Équipements PAC,Annuellement,Consulter fournisseurs 2026
+,Prix accessoires,Semestriellement,Vérifier prix BTP
+,Coût MOD horaire,Annuellement,"Augmentation ~2-3% par an"
+,Fluide frigorigène,Trimestriellement,"Volatilité prix marché"
+
+LIMITATIONS_CONNUES,,,
+,Distance >50m,Calcul spécifique,Perte charge > seuil acceptable
+,Surface >200m²,Consulter fabricant,Dimensionnement PAC double possible
+,Multi-étages >3,Vérifier accès,Durée MOD peut augmenter 20-30%
+,Bâtiment très ancien,Audit thermique,Coefficient peut être > 0.20
+,Accès très difficile,Visite préalable,Majoration 30-50% possible
+
+================================================================================
+================================================================================
+VERSION: 1.0
+DATE: 28/05/2026
+COMPATIBLE: Excel 2016+ | LibreOffice Calc | Google Sheets
+LANGUE: Français
+STATUS: PRODUCTION
+AUTEUR: Formation PAC Gainable
+================================================================================
